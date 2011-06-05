@@ -12,7 +12,7 @@ irc.on(/^:([^ !]+)![^!@]+@[^@ ]+ PRIVMSG (#[^ ]+) :js> (.+)$/, function(info)
 function run(nick, chan, cmd)
 {
 	cmd = 'node run.js "' + cmd.replace(/"/g, '\\"') + '"';
-	exec(cmd, function(error, stdout, stderr)
+	exec(cmd, {timeout: 4000}, function(error, stdout, stderr)
 	{
 		stderr = stderr.trim();
 		if (stderr !== '')
@@ -23,6 +23,11 @@ function run(nick, chan, cmd)
 		else
 		{
 			var output = stdout.trim();
+		}
+
+		if (error && error.signal === 'SIGTERM')
+		{
+			var output = 'Maximum execution time exceeded.';
 		}
 
 		irc.raw('PRIVMSG ' + chan + ' :' + nick + ': ' + output);
