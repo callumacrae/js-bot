@@ -2,6 +2,19 @@ var exec = require('child_process').exec,
 	IRC = require('irc'),
 	config = require('./config');
 
+if (process.argv[2])
+{
+	config.server.addr = process.argv[2];
+}
+if (process.argv[3])
+{
+	config.chans = [process.argv[3]];
+}
+if (process.argv[4])
+{
+	config.user.nick = process.argv[4];
+}
+
 irc = new IRC(config);
 
 irc.on(/^:([^ !]+)![^!@]+@[^@ ]+ PRIVMSG (#[^ ]+) :js> (.+)$/, function(info)
