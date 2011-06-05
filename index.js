@@ -1,25 +1,30 @@
-var exec = require('child_process').exec;
+var exec = require('child_process').exec,
+	IRC = require('irc'),
+	config = require('./config');
 
-function run(cmd)
+irc = new IRC(config);
+
+irc.on(/^:([^ !]+)![^!@]+@[^@ ]+ PRIVMSG (#[^ ]+) :js> (.+)$/, function(info)
+{
+	run(info[1], info[2], info[3]);
+})
+
+function run(nick, chan, cmd)
 {
 	cmd = 'node run.js "' + cmd.replace(/"/g, '\\"') + '"';
 	exec(cmd, function(error, stdout, stderr)
 	{
-		stdout = stdout.trim();
 		stderr = stderr.trim();
 		if (stderr !== '')
 		{
 			stderr = stderr.split('\n')[3];
-			console.log(stderr);
+			var output = stderr;
 		}
 		else
 		{
-			console.log(stdout);
+			var output = stdout.trim();
 		}
+
+		irc.raw('PRIVMSG ' + chan + ' :' + nick + ': ' + output);
 	});
 }
-
-setInterval(function()
-{
-	run('function test(x) { return  * x; }; test(4)');
-}, 1000);
